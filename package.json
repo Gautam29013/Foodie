@@ -1,0 +1,12 @@
+{
+  "name": "foodie-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:all": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\" \"npm run dev --prefix admin\"",
+    "install:all": "npm install --prefix client && npm install --prefix server && npm install --prefix admin"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
