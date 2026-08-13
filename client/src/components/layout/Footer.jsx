@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { FiFacebook as Facebook, FiTwitter as Twitter, FiInstagram as Instagram, FiYoutube as Youtube } from 'react-icons/fi';
 
 const Footer = () => {
   return (
