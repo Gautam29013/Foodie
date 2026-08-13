@@ -32,5 +32,5 @@ const HeroBanner = () => {
     </div>
   );
 };
-. . 
+
 export default HeroBanner;
