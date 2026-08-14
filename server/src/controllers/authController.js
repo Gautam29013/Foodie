@@ -152,7 +152,8 @@ export const googleLogin = async (req, res, next) => {
       role: user.role,
     });
   } catch (error) {
+    console.error('Google Login Error:', error);
     res.status(401);
-    next(new Error('Invalid Google credential'));
+    next(new Error(`Google Auth Failed: ${error.message}`));
   }
 };
