@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import { OAuth2Client } from 'google-auth-library';
@@ -124,7 +125,6 @@ export const googleLogin = async (req, res, next) => {
     const payload = ticket.getPayload();
     const { email, name, sub: googleId } = payload;
     
-    import mongoose from 'mongoose'; // Ensure mongoose is imported
     // Check if user exists
     let user;
     
