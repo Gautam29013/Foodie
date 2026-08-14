@@ -1,5 +1,8 @@
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -97,5 +100,59 @@ export const getUserProfile = async (req, res, next) => {
     }
   } catch (error) {
     next(error);
+  }
+};
+
+// @desc    Auth user with Google
+// @route   POST /api/auth/google
+// @access  Public
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    
+    if (!credential) {
+      res.status(400);
+      throw new Error('Please provide a Google credential');
+    }
+    
+    // Verify the Google token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId } = payload;
+    
+    // Check if user exists
+    let user = await User.findOne({ email });
+    
+    if (user) {
+      // If user exists but doesn't have googleId, link it
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // Create new user (phone and password omitted since they are optional now)
+      user = await User.create({
+        name,
+        email,
+        googleId,
+      });
+    }
+    
+    generateToken(res, user._id);
+    
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(401);
+    next(new Error('Invalid Google credential'));
   }
 };

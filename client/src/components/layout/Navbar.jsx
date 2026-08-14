@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, MapPin, Menu } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon } from 'lucide-react';
 
 const Navbar = () => {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    if (!isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border transition-colors duration-200">
       {/* Top Announcement Bar */}
       <div className="bg-primary text-primary-foreground text-xs text-center py-1.5 font-medium">
         Fresh groceries delivered to your doorstep in 30 minutes!
@@ -44,19 +69,28 @@ const Navbar = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4 md:gap-6">
-            <Link to="/profile" className="text-gray-600 hover:text-primary transition-colors flex flex-col items-center gap-1">
+          <div className="flex items-center gap-4 md:gap-6 text-foreground">
+            <button 
+              onClick={toggleTheme} 
+              className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={22} /> : <Moon size={22} />}
+              <span className="text-[10px] font-medium hidden md:block">Theme</span>
+            </button>
+
+            <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
               <User size={22} />
               <span className="text-[10px] font-medium hidden md:block">Login</span>
             </Link>
             
-            <Link to="/wishlist" className="text-gray-600 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
+            <Link to="/wishlist" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <Heart size={22} />
               <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
               <span className="text-[10px] font-medium hidden md:block">Wishlist</span>
             </Link>
             
-            <Link to="/cart" className="text-gray-600 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
+            <Link to="/cart" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <ShoppingCart size={22} />
               <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
               <span className="text-[10px] font-medium hidden md:block">Cart</span>
@@ -80,8 +114,8 @@ const Navbar = () => {
       </div>
       
       {/* Category Nav - Desktop */}
-      <div className="bg-gray-50 border-y border-gray-100 hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between text-sm font-medium text-gray-700">
+      <div className="bg-gray-50 dark:bg-card border-y border-gray-100 dark:border-border hidden md:block transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-200">
           <button className="flex items-center gap-2 bg-primary text-white px-4 h-full">
             <Menu size={18} />
             All Categories

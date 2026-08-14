@@ -35,12 +35,11 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, 'Please provide a phone number'],
-      unique: true
+      unique: true,
+      sparse: true // Allows multiple null values
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
       minlength: [6, 'Password must be at least 6 characters'],
       select: false // Do not return password by default
     },
@@ -55,7 +54,12 @@ const userSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
       }
-    ]
+    ],
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true
+    }
   },
   { timestamps: true }
 );

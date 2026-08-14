@@ -14,6 +14,17 @@
     --border: 240 5.9% 90%;
     --radius: 0.5rem;
   }
+  .dark {
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 35 92% 53%;
+    --secondary-foreground: 0 0% 100%;
+    --background: 240 10% 10%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 15%;
+    --card-foreground: 0 0% 98%;
+    --border: 240 5.9% 25%;
+  }
 }
 
 body {
