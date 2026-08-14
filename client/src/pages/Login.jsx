@@ -11,7 +11,7 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setIsLoading(true);
-      const res = await axios.post('http://localhost:5000/api/auth/google', {
+      const res = await axios.post('http://localhost:5001/api/auth/google', {
         credential: credentialResponse.credential,
       });
       
