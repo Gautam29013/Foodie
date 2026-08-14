@@ -19,8 +19,8 @@ import authRoutes from './routes/authRoutes.js';
 dotenv.config();
 
 // Connect to MongoDB
-// Uncomment below once a valid URI is placed in the .env file
-// connectDB();
+// You MUST place a valid MONGODB_URI in the .env file!
+connectDB();
 
 const app = express();
 
