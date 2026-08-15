@@ -40,8 +40,8 @@ const AppContent = () => {
 };
 
 function App() {
-  // Use environment variable for client ID, fallback to placeholder
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE";
+  // Hardcoded to ensure it picks up the correct ID without needing a hard server restart
+  const clientId = "852046442024-4g355ukjk2robmp3s3h8m581s8gd9ev4.apps.googleusercontent.com";
 
   return (
     <GoogleOAuthProvider clientId={clientId}>

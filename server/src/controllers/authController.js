@@ -116,13 +116,20 @@ export const googleLogin = async (req, res, next) => {
       throw new Error('Please provide a Google credential');
     }
     
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    console.log("Backend using Client ID:", clientId);
+    
+    const dynamicClient = new OAuth2Client(clientId);
+    
     // Verify the Google token
-    const ticket = await client.verifyIdToken({
+    const ticket = await dynamicClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: clientId,
     });
     
     const payload = ticket.getPayload();
+    console.log("Token payload audience:", payload.aud);
+    
     const { email, name, sub: googleId } = payload;
     
     // Check if user exists
