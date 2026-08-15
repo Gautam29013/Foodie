@@ -61,7 +61,7 @@ const Login = () => {
       <div className="w-full max-w-[420px] bg-[#131b2f] p-8 sm:p-10 rounded-3xl border border-slate-800/50 shadow-2xl relative z-10">
         
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(34,197,94,0.4)] relative">
+          <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.4)] relative">
             <div className="absolute inset-0 bg-white/20 rounded-2xl" />
             <Utensils className="text-white w-7 h-7 relative z-10" strokeWidth={2.5} />
           </div>
