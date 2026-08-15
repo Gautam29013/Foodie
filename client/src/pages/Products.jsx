@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import ProductCard from '../components/ui/ProductCard';
 import FilterSidebar from '../components/products/FilterSidebar';
 import SortDropdown from '../components/products/SortDropdown';
 
 const Products = () => {
   const { category } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get('search') || '';
+  
   const [currentSort, setCurrentSort] = useState('newest');
 
   // Temporary mock data
@@ -20,10 +24,18 @@ const Products = () => {
     { _id: '8', name: 'Potato', category: { name: 'Vegetables' }, weight: 1, unit: 'kg', price: 30, mrp: 40, discount: 25, averageRating: 4.4, numOfReviews: 320, images: [{ url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=60' }] },
   ];
 
-  // Simple mock filtering based on URL
-  const displayedProducts = category 
+  // Filtering based on URL parameters and search query
+  let displayedProducts = category 
     ? mockProducts.filter(p => p.category.name.toLowerCase() === category.toLowerCase())
     : mockProducts;
+    
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    displayedProducts = displayedProducts.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.category.name.toLowerCase().includes(query)
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

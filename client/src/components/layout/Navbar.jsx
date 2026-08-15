@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  // Location states
+  const [locationName, setLocationName] = useState('Mumbai 400001');
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -14,6 +21,12 @@ const Navbar = () => {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+
+    // Load saved location if any
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      setLocationName(savedLocation);
     }
   }, []);
 
@@ -27,6 +40,75 @@ const Navbar = () => {
       localStorage.setItem('theme', 'light');
     }
   };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsLocating(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Using OpenStreetMap's free Nominatim API for reverse geocoding
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          
+          const data = await response.json();
+          
+          if (data && data.address) {
+            const city = data.address.city || data.address.town || data.address.village || data.address.suburb || 'Unknown Location';
+            const postcode = data.address.postcode || '';
+            const newLocation = postcode ? `${city} ${postcode}` : city;
+            
+            setLocationName(newLocation);
+            localStorage.setItem('userLocation', newLocation);
+            toast.success(`Location updated to ${newLocation}`);
+          } else {
+            toast.error('Could not determine city from location');
+          }
+        } catch (error) {
+          console.error('Error fetching location details:', error);
+          toast.error('Failed to get location name');
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            toast.error('Location permission denied');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            toast.error('Location information is unavailable');
+            break;
+          case error.TIMEOUT:
+            toast.error('Location request timed out');
+            break;
+          default:
+            toast.error('An unknown error occurred getting location');
+            break;
+        }
+      },
+      { timeout: 10000 }
+    );
+  };
+
+  // Get user info from local storage
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
 
   return (
     <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border transition-colors duration-200">
@@ -49,23 +131,33 @@ const Navbar = () => {
           </div>
 
           {/* Location - Desktop Only */}
-          <div className="hidden md:flex items-center gap-1 text-sm text-gray-600 ml-6 cursor-pointer hover:text-primary transition-colors">
-            <MapPin size={18} />
-            <span>Deliver to <b className="text-foreground">Mumbai 400001</b></span>
+          <div 
+            onClick={handleGetLocation}
+            className="hidden md:flex items-center gap-1 text-sm text-gray-600 ml-6 cursor-pointer hover:text-primary transition-colors group"
+            title="Click to fetch current location"
+          >
+            {isLocating ? (
+              <Loader2 size={18} className="animate-spin text-primary" />
+            ) : (
+              <MapPin size={18} className="group-hover:animate-bounce" />
+            )}
+            <span>Deliver to <b className="text-foreground">{isLocating ? 'Locating...' : locationName}</b></span>
           </div>
 
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl px-6 hidden md:block">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
-              </div>
+            <form onSubmit={handleSearch} className="relative">
+              <button type="submit" className="absolute inset-y-0 left-0 pl-3 flex items-center focus:outline-none">
+                <Search size={18} className="text-gray-400 hover:text-primary transition-colors" />
+              </button>
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-all"
                 placeholder="Search for fresh fruits, vegetables and more..."
               />
-            </div>
+            </form>
           </div>
 
           {/* Actions */}
@@ -79,15 +171,19 @@ const Navbar = () => {
               <span className="text-[10px] font-medium hidden md:block">Theme</span>
             </button>
 
-            <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
-              <User size={22} />
-              <span className="text-[10px] font-medium hidden md:block">Login</span>
-            </Link>
-
-            <Link to="/settings" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
-              <User size={22} />
-              <span className="text-[10px] font-medium hidden md:block">Settings</span>
-            </Link>
+            {userInfo ? (
+              <Link to="/settings" className="flex flex-col items-center gap-1">
+                <div className="w-[22px] h-[22px] bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold uppercase">
+                  {userInfo.name ? userInfo.name.charAt(0) : 'U'}
+                </div>
+                <span className="text-[10px] font-medium hidden md:block text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Profile</span>
+              </Link>
+            ) : (
+              <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
+                <User size={22} />
+                <span className="text-[10px] font-medium hidden md:block">Login</span>
+              </Link>
+            )}
             
             <Link to="/wishlist" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <Heart size={22} />
@@ -105,16 +201,18 @@ const Navbar = () => {
         
         {/* Mobile Search Bar */}
         <div className="pb-3 md:hidden">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={18} className="text-gray-400" />
-            </div>
+          <form onSubmit={handleSearch} className="relative">
+            <button type="submit" className="absolute inset-y-0 left-0 pl-3 flex items-center focus:outline-none">
+              <Search size={18} className="text-gray-400 hover:text-primary transition-colors" />
+            </button>
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="Search groceries..."
             />
-          </div>
+          </form>
         </div>
       </div>
       

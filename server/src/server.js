@@ -30,7 +30,22 @@ app.use(helmet());
 
 // Enable CORS
 app.use(cors({ 
-  origin: [process.env.CLIENT_URL, process.env.ADMIN_URL], 
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow any localhost port during development
+    if (origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    
+    const allowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL];
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true 
 }));
 
