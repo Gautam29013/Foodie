@@ -83,6 +83,11 @@ const Navbar = () => {
               <User size={22} />
               <span className="text-[10px] font-medium hidden md:block">Login</span>
             </Link>
+
+            <Link to="/settings" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
+              <User size={22} />
+              <span className="text-[10px] font-medium hidden md:block">Settings</span>
+            </Link>
             
             <Link to="/wishlist" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <Heart size={22} />

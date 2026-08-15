@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import { OAuth2Client } from 'google-auth-library';
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode';
+import jwt from 'jsonwebtoken';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -35,6 +38,7 @@ export const registerUser = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        twoFactorEnabled: user.twoFactorEnabled,
       });
     } else {
       res.status(400);
@@ -56,6 +60,15 @@ export const loginUser = async (req, res, next) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
+      // Check if 2FA is enabled
+      if (user.twoFactorEnabled) {
+        // Return a temporary token or just userId to verify 2FA next
+        return res.json({ 
+          requires2FA: true, 
+          tempUserId: user._id 
+        });
+      }
+
       generateToken(res, user._id);
 
       res.json({
@@ -64,10 +77,51 @@ export const loginUser = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        twoFactorEnabled: user.twoFactorEnabled,
       });
     } else {
       res.status(401);
       throw new Error('Invalid email or password');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Login with 2FA Token
+// @route   POST /api/auth/login/2fa
+// @access  Public
+export const login2FA = async (req, res, next) => {
+  try {
+    const { userId, token } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user || !user.twoFactorEnabled) {
+      res.status(400);
+      throw new Error('Invalid 2FA request');
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token,
+      window: 1 // Allow 30 seconds clock skew
+    });
+
+    if (verified) {
+      generateToken(res, user._id);
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        twoFactorEnabled: user.twoFactorEnabled,
+      });
+    } else {
+      res.status(401);
+      throw new Error('Invalid 2FA token');
     }
   } catch (error) {
     next(error);
@@ -91,10 +145,47 @@ export const logoutUser = (req, res) => {
 export const getUserProfile = async (req, res, next) => {
   try {
     // req.user is set by the protect middleware
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select('-twoFactorSecret');
 
     if (user) {
       res.json(user); 
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/me
+// @access  Private
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      if (req.body.phone) {
+        user.phone = req.body.phone;
+      }
+
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        twoFactorEnabled: updatedUser.twoFactorEnabled,
+      });
     } else {
       res.status(404);
       throw new Error('User not found');
@@ -117,7 +208,6 @@ export const googleLogin = async (req, res, next) => {
     }
     
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    console.log("Backend using Client ID:", clientId);
     
     const dynamicClient = new OAuth2Client(clientId);
     
@@ -128,8 +218,6 @@ export const googleLogin = async (req, res, next) => {
     });
     
     const payload = ticket.getPayload();
-    console.log("Token payload audience:", payload.aud);
-    
     const { email, name, sub: googleId } = payload;
     
     // Check if user exists
@@ -137,7 +225,6 @@ export const googleLogin = async (req, res, next) => {
     
     // INSTANT FIX: If MongoDB is not connected, mock the login so the UI works!
     if (mongoose.connection.readyState !== 1) {
-      console.warn("MongoDB is not connected. Mocking Google Login for demonstration.");
       generateToken(res, 'mock_user_id_123');
       return res.json({
         _id: 'mock_user_id_123',
@@ -145,6 +232,7 @@ export const googleLogin = async (req, res, next) => {
         email,
         phone: '',
         role: 'CUSTOMER',
+        twoFactorEnabled: false
       });
     }
 
@@ -165,6 +253,14 @@ export const googleLogin = async (req, res, next) => {
       });
     }
     
+    // Check 2FA for Google Login as well
+    if (user.twoFactorEnabled) {
+      return res.json({ 
+        requires2FA: true, 
+        tempUserId: user._id 
+      });
+    }
+
     generateToken(res, user._id);
     
     res.json({
@@ -173,10 +269,99 @@ export const googleLogin = async (req, res, next) => {
       email: user.email,
       phone: user.phone || '',
       role: user.role,
+      twoFactorEnabled: user.twoFactorEnabled,
     });
   } catch (error) {
     console.error('Google Login Error:', error);
     res.status(401);
     next(new Error(`Google Auth Failed: ${error.message}`));
+  }
+};
+
+// @desc    Generate 2FA Secret
+// @route   POST /api/auth/2fa/generate
+// @access  Private
+export const generate2FA = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const secret = speakeasy.generateSecret({ 
+      name: `FoodieApp (${user.email})` 
+    });
+
+    user.twoFactorSecret = secret.base32;
+    await user.save();
+
+    qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
+      if (err) {
+        res.status(500);
+        throw new Error('Error generating QR code');
+      }
+      res.json({
+        secret: secret.base32,
+        qrCodeUrl: data_url
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify and Enable 2FA
+// @route   POST /api/auth/2fa/verify
+// @access  Private
+export const verify2FA = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user || !user.twoFactorSecret) {
+      res.status(400);
+      throw new Error('2FA secret not generated yet');
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token,
+      window: 1
+    });
+
+    if (verified) {
+      user.twoFactorEnabled = true;
+      await user.save();
+      res.json({ message: 'Two-factor authentication enabled successfully' });
+    } else {
+      res.status(400);
+      throw new Error('Invalid token. Try again.');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Disable 2FA
+// @route   POST /api/auth/2fa/disable
+// @access  Private
+export const disable2FA = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.twoFactorEnabled = false;
+      user.twoFactorSecret = undefined;
+      await user.save();
+      res.json({ message: 'Two-factor authentication disabled' });
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    next(error);
   }
 };
