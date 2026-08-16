@@ -199,8 +199,8 @@ const Navbar = () => {
             </button>
 
             {userInfo ? (
-              <>
-                <Link to="/settings" className="flex flex-col items-center gap-1">
+              <div className="relative group cursor-pointer py-2">
+                <div className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">
                   <div className="w-[22px] h-[22px] bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold uppercase overflow-hidden">
                     {userInfo?.profilePicture ? (
                       <img src={userInfo.profilePicture} alt={userInfo.name || 'User'} className="w-full h-full object-cover" />
@@ -208,13 +208,33 @@ const Navbar = () => {
                       userInfo?.name ? userInfo.name.charAt(0) : 'U'
                     )}
                   </div>
-                  <span className="text-[10px] font-medium hidden md:block text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Profile</span>
-                </Link>
-                <button onClick={handleLogout} className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors flex flex-col items-center gap-1 cursor-pointer">
-                  <LogOut size={22} />
-                  <span className="text-[10px] font-medium hidden md:block">Logout</span>
-                </button>
-              </>
+                  <span className="text-[10px] font-medium hidden md:block">Profile</span>
+                </div>
+
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 top-full mt-0 w-60 bg-white dark:bg-card rounded-xl shadow-xl border border-gray-100 dark:border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform origin-top-right group-hover:scale-100 scale-95">
+                  <div className="p-4 border-b border-gray-100 dark:border-border">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Welcome back,</p>
+                    <p className="font-bold text-gray-900 dark:text-white truncate">{userInfo?.name || 'Customer'}</p>
+                  </div>
+                  <div className="py-2 flex flex-col">
+                    <Link to="/settings" className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-muted flex items-center gap-3 transition-colors">
+                      <User size={18} className="text-primary" /> My Profile
+                    </Link>
+                    <Link to="/orders" className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-muted flex items-center gap-3 transition-colors">
+                      <div className="relative flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                      </div>
+                      Orders
+                    </Link>
+                  </div>
+                  <div className="py-2 border-t border-gray-100 dark:border-border flex flex-col">
+                    <button onClick={handleLogout} className="px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 text-left transition-colors w-full">
+                      <LogOut size={18} /> Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
                 <User size={22} />

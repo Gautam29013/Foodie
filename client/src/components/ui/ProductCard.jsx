@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleWishlist } from '../../redux/wishlistSlice';
+import { addToCart } from '../../redux/cartSlice';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const wishlistItems = useSelector(state => state.wishlist.items) || [];
+  const cartItems = useSelector(state => state.cart?.cartItems) || [];
   
   // Demo placeholder data if product prop is missing
   const data = product || {
@@ -95,7 +97,9 @@ const ProductCard = ({ product }) => {
           <button 
             onClick={(e) => {
               e.preventDefault();
-              dispatch({ type: 'cart/addToCart', payload: { ...data, qty: 1 } });
+              const existItem = cartItems.find(x => x._id === data._id);
+              const qty = existItem ? existItem.qty + 1 : 1;
+              dispatch(addToCart({ ...data, qty }));
               toast.success('Added to cart');
             }}
             className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors flex items-center justify-center"

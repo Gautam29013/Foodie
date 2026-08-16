@@ -27,30 +27,23 @@ const Settings = () => {
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const res = await axiosInstance.get('/auth/me');
-      setUser(res.data);
-      setName(res.data.name);
-      setEmail(res.data.email);
-      setPhone(res.data.phone || '');
-      setIs2FAEnabled(res.data.twoFactorEnabled || false);
-      
-      // Update local storage safely
-      let userInfo = {};
-      try {
-        const stored = localStorage.getItem('userInfo');
-        if (stored && stored !== 'undefined') {
-          userInfo = JSON.parse(stored);
-        }
-      } catch (e) {
-        console.error('Failed to parse userInfo', e);
+      const stored = localStorage.getItem('userInfo');
+      if (stored && stored !== 'undefined') {
+        const userInfo = JSON.parse(stored);
+        setUser(userInfo);
+        setName(userInfo.name || '');
+        setEmail(userInfo.email || '');
+        setPhone(userInfo.phone || '');
+        setIs2FAEnabled(userInfo.twoFactorEnabled || false);
+      } else {
+        toast.error('Please login to view profile');
       }
-      localStorage.setItem('userInfo', JSON.stringify({ ...userInfo, ...res.data }));
     } catch (error) {
       console.error(error);
-      toast.error('Failed to fetch profile');
+      toast.error('Failed to fetch profile data');
     } finally {
       setIsLoading(false);
     }
