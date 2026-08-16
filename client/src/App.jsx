@@ -11,6 +11,7 @@ import Cart from './pages/Cart';
 import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Settings from './pages/Settings';
 
 const NotFound = () => <div className="p-8 text-2xl font-bold text-red-500 text-center">404 - Page Not Found</div>;
@@ -26,6 +27,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:category" element={<Products />} />

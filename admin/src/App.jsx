@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -17,6 +17,53 @@ const Placeholder = ({ title }) => (
 );
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include' // This is crucial to send the HTTP-only jwt cookie
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.role === 'ADMIN') {
+            setIsAuthenticated(true);
+          } else {
+            // Logged in but not admin
+            window.location.href = 'http://localhost:5173/login';
+          }
+        } else {
+          // Not logged in
+          window.location.href = 'http://localhost:5173/login';
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        window.location.href = 'http://localhost:5173/login';
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null; // Prevent flash before redirect
+
   return (
     <BrowserRouter>
       <div className="flex min-h-screen bg-gray-100">

@@ -60,6 +60,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true
     },
+    profilePicture: {
+      type: String,
+      default: ''
+    },
     twoFactorSecret: {
       type: String
     },

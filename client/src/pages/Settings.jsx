@@ -37,10 +37,19 @@ const Settings = () => {
       setPhone(res.data.phone || '');
       setIs2FAEnabled(res.data.twoFactorEnabled || false);
       
-      // Update local storage
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      // Update local storage safely
+      let userInfo = {};
+      try {
+        const stored = localStorage.getItem('userInfo');
+        if (stored && stored !== 'undefined') {
+          userInfo = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error('Failed to parse userInfo', e);
+      }
       localStorage.setItem('userInfo', JSON.stringify({ ...userInfo, ...res.data }));
     } catch (error) {
+      console.error(error);
       toast.error('Failed to fetch profile');
     } finally {
       setIsLoading(false);
@@ -54,7 +63,16 @@ const Settings = () => {
       toast.success('Profile updated successfully');
       setUser(res.data);
       
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      // Safely update local storage
+      let userInfo = {};
+      try {
+        const stored = localStorage.getItem('userInfo');
+        if (stored && stored !== 'undefined') {
+          userInfo = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error('Failed to parse userInfo', e);
+      }
       localStorage.setItem('userInfo', JSON.stringify({ ...userInfo, ...res.data }));
     } catch (error) {
       toast.error(error.response?.data?.message || 'Update failed');

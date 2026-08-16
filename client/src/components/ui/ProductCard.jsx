@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white rounded-xl border border-gray-100 p-4 hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
+    <div className="group bg-white rounded-xl border border-gray-100 p-4 transition-all duration-300 relative flex flex-col h-full hover-float">
       {/* Discount Badge */}
       {data.discount > 0 && (
         <div className="absolute top-3 left-3 bg-secondary text-white text-xs font-bold px-2 py-1 rounded-md z-10">

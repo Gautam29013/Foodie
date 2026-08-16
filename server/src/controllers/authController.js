@@ -38,6 +38,7 @@ export const registerUser = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profilePicture: user.profilePicture,
         twoFactorEnabled: user.twoFactorEnabled,
       });
     } else {
@@ -77,6 +78,7 @@ export const loginUser = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profilePicture: user.profilePicture,
         twoFactorEnabled: user.twoFactorEnabled,
       });
     } else {
@@ -117,6 +119,7 @@ export const login2FA = async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        profilePicture: user.profilePicture,
         twoFactorEnabled: user.twoFactorEnabled,
       });
     } else {
@@ -184,6 +187,7 @@ export const updateUserProfile = async (req, res, next) => {
         email: updatedUser.email,
         phone: updatedUser.phone,
         role: updatedUser.role,
+        profilePicture: updatedUser.profilePicture,
         twoFactorEnabled: updatedUser.twoFactorEnabled,
       });
     } else {
@@ -218,7 +222,7 @@ export const googleLogin = async (req, res, next) => {
     });
     
     const payload = ticket.getPayload();
-    const { email, name, sub: googleId } = payload;
+    const { email, name, sub: googleId, picture } = payload;
     
     // Check if user exists
     let user;
@@ -232,6 +236,7 @@ export const googleLogin = async (req, res, next) => {
         email,
         phone: '',
         role: 'CUSTOMER',
+        profilePicture: picture || '',
         twoFactorEnabled: false
       });
     }
@@ -239,17 +244,29 @@ export const googleLogin = async (req, res, next) => {
     user = await User.findOne({ email });
     
     if (user) {
-      // If user exists but doesn't have googleId, link it
+      if (user.role === 'ADMIN') {
+        res.status(403);
+        throw new Error('Admin must login using email and password, not Google.');
+      }
+      
+      // If user exists but doesn't have googleId or picture, link it
+      let isUpdated = false;
       if (!user.googleId) {
         user.googleId = googleId;
-        await user.save();
+        isUpdated = true;
       }
+      if (!user.profilePicture && picture) {
+        user.profilePicture = picture;
+        isUpdated = true;
+      }
+      if (isUpdated) await user.save();
     } else {
       // Create new user (phone and password omitted since they are optional now)
       user = await User.create({
         name,
         email,
         googleId,
+        profilePicture: picture || '',
       });
     }
     
@@ -269,6 +286,7 @@ export const googleLogin = async (req, res, next) => {
       email: user.email,
       phone: user.phone || '',
       role: user.role,
+      profilePicture: user.profilePicture,
       twoFactorEnabled: user.twoFactorEnabled,
     });
   } catch (error) {

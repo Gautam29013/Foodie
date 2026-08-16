@@ -72,7 +72,12 @@ const Login = () => {
 
       localStorage.setItem('userInfo', JSON.stringify(res.data));
       toast.success('Successfully logged in!');
-      navigate('/');
+      
+      if (res.data.role === 'ADMIN') {
+        window.location.href = 'http://localhost:5174/';
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {
@@ -93,7 +98,12 @@ const Login = () => {
       
       localStorage.setItem('userInfo', JSON.stringify(res.data));
       toast.success('Successfully logged in!');
-      navigate('/');
+      
+      if (res.data.role === 'ADMIN') {
+        window.location.href = 'http://localhost:5174/';
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid 2FA code');
     } finally {

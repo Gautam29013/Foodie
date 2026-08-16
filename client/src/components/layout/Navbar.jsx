@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon, Loader2 } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon, Loader2, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
@@ -107,8 +107,32 @@ const Navbar = () => {
     );
   };
 
-  // Get user info from local storage
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:5001/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
+      localStorage.removeItem('userInfo');
+      toast.success('Logged out successfully');
+      navigate('/login');
+      setTimeout(() => window.location.reload(), 100);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to logout');
+    }
+  };
+
+  // Safely get user info from local storage
+  let userInfo = null;
+  try {
+    const storedInfo = localStorage.getItem('userInfo');
+    if (storedInfo && storedInfo !== 'undefined') {
+      userInfo = JSON.parse(storedInfo);
+    }
+  } catch (e) {
+    console.error('Failed to parse userInfo', e);
+  }
 
   return (
     <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border transition-colors duration-200">
@@ -172,12 +196,22 @@ const Navbar = () => {
             </button>
 
             {userInfo ? (
-              <Link to="/settings" className="flex flex-col items-center gap-1">
-                <div className="w-[22px] h-[22px] bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold uppercase">
-                  {userInfo.name ? userInfo.name.charAt(0) : 'U'}
-                </div>
-                <span className="text-[10px] font-medium hidden md:block text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Profile</span>
-              </Link>
+              <>
+                <Link to="/settings" className="flex flex-col items-center gap-1">
+                  <div className="w-[22px] h-[22px] bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold uppercase overflow-hidden">
+                    {userInfo?.profilePicture ? (
+                      <img src={userInfo.profilePicture} alt={userInfo.name || 'User'} className="w-full h-full object-cover" />
+                    ) : (
+                      userInfo?.name ? userInfo.name.charAt(0) : 'U'
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium hidden md:block text-gray-600 dark:text-gray-300 hover:text-primary transition-colors">Profile</span>
+                </Link>
+                <button onClick={handleLogout} className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors flex flex-col items-center gap-1 cursor-pointer">
+                  <LogOut size={22} />
+                  <span className="text-[10px] font-medium hidden md:block">Logout</span>
+                </button>
+              </>
             ) : (
               <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1">
                 <User size={22} />
