@@ -10,6 +10,7 @@ const Products = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search') || '';
+  const isOffersOnly = searchParams.get('offers') === 'true';
   
   const [currentSort, setCurrentSort] = useState('newest');
 
@@ -17,6 +18,10 @@ const Products = () => {
   let displayedProducts = category 
     ? mockProducts.filter(p => p.category.name.toLowerCase() === category.toLowerCase())
     : mockProducts;
+    
+  if (isOffersOnly) {
+    displayedProducts = displayedProducts.filter(p => p.discount > 0);
+  }
     
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
@@ -30,7 +35,7 @@ const Products = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-6">
-        Home / Products {category ? `/ ${category.charAt(0).toUpperCase() + category.slice(1)}` : ''}
+        Home / Products {category ? `/ ${category.charAt(0).toUpperCase() + category.slice(1)}` : isOffersOnly ? '/ Offers' : ''}
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -43,7 +48,7 @@ const Products = () => {
         <div className="w-full md:w-3/4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h1 className="text-2xl font-bold text-gray-900 capitalize">
-              {category ? `${category} Products` : 'All Products'} 
+              {isOffersOnly ? 'Special Offers' : category ? `${category} Products` : 'All Products'} 
               <span className="text-sm font-normal text-gray-500 ml-2">({displayedProducts.length} items)</span>
             </h1>
             

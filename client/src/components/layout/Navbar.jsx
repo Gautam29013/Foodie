@@ -9,6 +9,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const wishlistItemsCount = useSelector(state => state.wishlist?.items?.length || 0);
+  const cartItemsCount = useSelector(state => state.cart?.cartItems?.reduce((acc, item) => acc + (item.qty || 1), 0) || 0);
 
   // Location states
   const [locationName, setLocationName] = useState('Mumbai 400001');
@@ -233,7 +234,11 @@ const Navbar = () => {
             
             <Link to="/cart" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <ShoppingCart size={22} />
-              <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  {cartItemsCount}
+                </span>
+              )}
               <span className="text-[10px] font-medium hidden md:block">Cart</span>
             </Link>
           </div>
@@ -271,9 +276,9 @@ const Navbar = () => {
             <Link to="/products/snacks" className="hover:text-primary transition-colors">Snacks</Link>
             <Link to="/products/beverages" className="hover:text-primary transition-colors">Beverages</Link>
           </div>
-          <div className="text-secondary font-bold">
+          <Link to="/products?offers=true" className="text-secondary font-bold hover:underline transition-all cursor-pointer">
             Offers zone
-          </div>
+          </Link>
         </div>
       </div>
     </header>

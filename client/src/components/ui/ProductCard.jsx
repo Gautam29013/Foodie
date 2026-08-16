@@ -92,7 +92,14 @@ const ProductCard = ({ product }) => {
               )}
             </div>
           </div>
-          <button className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors flex items-center justify-center">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch({ type: 'cart/addToCart', payload: { ...data, qty: 1 } });
+              toast.success('Added to cart');
+            }}
+            className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-colors flex items-center justify-center"
+          >
             <ShoppingCart size={20} />
           </button>
         </div>
