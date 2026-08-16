@@ -12,16 +12,16 @@ const Products = () => {
   
   const [currentSort, setCurrentSort] = useState('newest');
 
-  // Temporary mock data
   const mockProducts = [
-    { _id: '1', name: 'Fresh Red Apples', category: { name: 'Fruits' }, weight: 1, unit: 'kg', price: 149, mrp: 199, discount: 25, averageRating: 4.5, numOfReviews: 128, images: [{ url: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6fb6c?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '2', name: 'Organic Bananas', category: { name: 'Fruits' }, weight: 1, unit: 'dozen', price: 60, mrp: 80, discount: 25, averageRating: 4.8, numOfReviews: 245, images: [{ url: 'https://images.unsplash.com/photo-1571501474588-5a210ff41dcb?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '3', name: 'Fresh Tomatoes', category: { name: 'Vegetables' }, weight: 500, unit: 'g', price: 40, mrp: 50, discount: 20, averageRating: 4.2, numOfReviews: 89, images: [{ url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '4', name: 'Farm Eggs', category: { name: 'Dairy' }, weight: 6, unit: 'pieces', price: 55, mrp: 60, discount: 8, averageRating: 4.6, numOfReviews: 156, images: [{ url: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '5', name: 'Whole Wheat Atta', category: { name: 'Staples' }, weight: 5, unit: 'kg', price: 210, mrp: 250, discount: 16, averageRating: 4.7, numOfReviews: 512, images: [{ url: 'https://images.unsplash.com/photo-1627485937980-221c88ce04ea?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '6', name: 'Green Cabbage', category: { name: 'Vegetables' }, weight: 1, unit: 'piece', price: 35, mrp: 45, discount: 22, averageRating: 4.1, numOfReviews: 54, images: [{ url: 'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '7', name: 'Fresh Milk', category: { name: 'Dairy' }, weight: 1, unit: 'L', price: 65, mrp: 70, discount: 7, averageRating: 4.9, numOfReviews: 840, images: [{ url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '8', name: 'Potato', category: { name: 'Vegetables' }, weight: 1, unit: 'kg', price: 30, mrp: 40, discount: 25, averageRating: 4.4, numOfReviews: 320, images: [{ url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=60' }] },
+    { _id: '1', name: 'Fresh Red Apples', category: { name: 'Fruits' }, weight: 1, unit: 'kg', price: 149, mrp: 199, discount: 25, averageRating: 4.5, numOfReviews: 128, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Apples.jpg/512px-Apples.jpg' }] },
+    { _id: '2', name: 'Organic Bananas', category: { name: 'Fruits' }, weight: 1, unit: 'dozen', price: 60, mrp: 80, discount: 25, averageRating: 4.8, numOfReviews: 245, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Bananas_white_background_DS.jpg/512px-Bananas_white_background_DS.jpg' }] },
+    { _id: '3', name: 'Fresh Tomatoes', category: { name: 'Vegetables' }, weight: 500, unit: 'g', price: 40, mrp: 50, discount: 20, averageRating: 4.2, numOfReviews: 89, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/512px-Tomato_je.jpg' }] },
+    { _id: '4', name: 'Farm Eggs', category: { name: 'Dairy' }, weight: 6, unit: 'pieces', price: 55, mrp: 60, discount: 8, averageRating: 4.6, numOfReviews: 156, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Chicken_egg_2009-06-04.jpg/512px-Chicken_egg_2009-06-04.jpg' }] },
+    { _id: '5', name: 'Whole Wheat Atta', category: { name: 'Staples' }, weight: 5, unit: 'kg', price: 210, mrp: 250, discount: 16, averageRating: 4.7, numOfReviews: 512, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Flour_in_a_jar.jpg/512px-Flour_in_a_jar.jpg' }] },
+    { _id: '6', name: 'Classic Potato Chips', category: { name: 'Snacks' }, weight: 150, unit: 'g', price: 50, mrp: 50, discount: 0, averageRating: 4.4, numOfReviews: 88, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Potato-Chips.jpg/512px-Potato-Chips.jpg' }] },
+    { _id: '7', name: 'Spicy Bombay Mix', category: { name: 'Snacks' }, weight: 400, unit: 'g', price: 85, mrp: 110, discount: 22, averageRating: 4.9, numOfReviews: 320, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Bombay_mix.jpg/512px-Bombay_mix.jpg' }] },
+    { _id: '8', name: 'Green Cabbage', category: { name: 'Vegetables' }, weight: 1, unit: 'piece', price: 35, mrp: 45, discount: 22, averageRating: 4.1, numOfReviews: 54, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Cabbage_and_cross_section_on_white.jpg/512px-Cabbage_and_cross_section_on_white.jpg' }] },
+    { _id: '9', name: 'Fresh Milk', category: { name: 'Dairy' }, weight: 1, unit: 'L', price: 65, mrp: 70, discount: 7, averageRating: 4.9, numOfReviews: 840, images: [{ url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Glass_of_milk.jpg/512px-Glass_of_milk.jpg' }] },
   ];
 
   // Filtering based on URL parameters and search query
@@ -38,7 +38,7 @@ const Products = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in-up">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-6">
         Home / Products {category ? `/ ${category.charAt(0).toUpperCase() + category.slice(1)}` : ''}
