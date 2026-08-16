@@ -1,7 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+let initialWishlist = [];
+try {
+  const saved = localStorage.getItem('wishlist');
+  if (saved) initialWishlist = JSON.parse(saved);
+} catch (e) {
+  console.error("Failed to parse wishlist from local storage", e);
+}
+
 const initialState = {
-  items: localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : [],
+  items: initialWishlist,
 };
 
 const wishlistSlice = createSlice({
