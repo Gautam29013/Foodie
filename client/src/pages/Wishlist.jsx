@@ -1,14 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ArrowRight } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import ProductCard from '../components/ui/ProductCard';
 
 const Wishlist = () => {
-  // Mock wishlist data
-  const wishlistItems = [
-    { _id: '3', name: 'Fresh Tomatoes', category: { name: 'Vegetables' }, weight: 500, unit: 'g', price: 40, mrp: 50, discount: 20, averageRating: 4.2, numOfReviews: 89, images: [{ url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=60' }] },
-    { _id: '7', name: 'Fresh Milk', category: { name: 'Dairy' }, weight: 1, unit: 'L', price: 65, mrp: 70, discount: 7, averageRating: 4.9, numOfReviews: 840, images: [{ url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=60' }] },
-  ];
+  const wishlistItems = useSelector((state) => state.wishlist.items) || [];
 
   if (wishlistItems.length === 0) {
     return (

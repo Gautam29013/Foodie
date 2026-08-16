@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleWishlist } from '../../redux/wishlistSlice';
+import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector(state => state.wishlist.items) || [];
+  
   // Demo placeholder data if product prop is missing
   const data = product || {
     _id: '1',
@@ -18,6 +24,18 @@ const ProductCard = ({ product }) => {
     images: [{ url: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6fb6c?auto=format&fit=crop&w=500&q=80' }]
   };
 
+  const isInWishlist = wishlistItems.some(item => item._id === data._id);
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    dispatch(toggleWishlist(data));
+    if (isInWishlist) {
+      toast.error('Removed from wishlist', { icon: '💔' });
+    } else {
+      toast.success('Added to wishlist', { icon: '❤️' });
+    }
+  };
+
   return (
     <div className="group bg-white rounded-xl border border-gray-100 p-4 transition-all duration-300 relative flex flex-col h-full hover-float">
       {/* Discount Badge */}
@@ -28,8 +46,12 @@ const ProductCard = ({ product }) => {
       )}
       
       {/* Wishlist Button */}
-      <button className="absolute top-3 right-3 text-gray-300 hover:text-red-500 z-10 transition-colors bg-white/80 p-1.5 rounded-full hover:bg-white">
-        <Heart size={18} />
+      <button 
+        onClick={handleWishlistClick}
+        className={`absolute top-3 right-3 z-10 transition-colors p-1.5 rounded-full hover:bg-white 
+        ${isInWishlist ? 'text-red-500 bg-white shadow-sm' : 'text-gray-300 bg-white/80 hover:text-red-500'}`}
+      >
+        <Heart size={18} className={isInWishlist ? 'fill-red-500' : ''} />
       </button>
       
       {/* Image */}

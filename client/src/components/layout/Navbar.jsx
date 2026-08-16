@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Heart, User, MapPin, Menu, Sun, Moon, Loader2, LogOut } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const wishlistItemsCount = useSelector(state => state.wishlist?.items?.length || 0);
 
   // Location states
   const [locationName, setLocationName] = useState('Mumbai 400001');
@@ -221,7 +223,11 @@ const Navbar = () => {
             
             <Link to="/wishlist" className="text-gray-600 dark:text-gray-300 hover:text-primary transition-colors flex flex-col items-center gap-1 relative">
               <Heart size={22} />
-              <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+              {wishlistItemsCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  {wishlistItemsCount}
+                </span>
+              )}
               <span className="text-[10px] font-medium hidden md:block">Wishlist</span>
             </Link>
             
