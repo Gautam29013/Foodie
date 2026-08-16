@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import HeroBanner from '../components/home/HeroBanner';
 import ProductCard from '../components/ui/ProductCard';
 import { mockProducts } from '../data/mockProducts';
@@ -14,12 +15,16 @@ const Home = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {['Fruits', 'Vegetables', 'Dairy', 'Staples', 'Snacks', 'Beverages'].map((cat, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group hover-float">
-              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <Link 
+              to={`/products/${cat.toLowerCase()}`} 
+              key={i} 
+              className="bg-white rounded-xl border border-gray-100 p-4 flex flex-col items-center justify-center gap-3 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group hover:-translate-y-1 duration-300"
+            >
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
                 <span className="text-primary text-xl font-bold">{cat[0]}</span>
               </div>
               <span className="font-medium text-gray-700 group-hover:text-primary transition-colors text-sm">{cat}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

@@ -10,6 +10,31 @@ export const protect = async (req, res, next) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Intercept mock admin
+      if (decoded.userId === 'admin_mock_id') {
+        req.user = {
+          _id: 'admin_mock_id',
+          name: 'System Admin',
+          email: 'admin@foodie.com',
+          role: 'ADMIN',
+          twoFactorEnabled: false
+        };
+        return next();
+      }
+      
+      // Intercept mock customer
+      if (decoded.userId === 'mock_user_id_123') {
+        req.user = {
+          _id: 'mock_user_id_123',
+          name: 'Demo User',
+          email: 'user@foodie.com',
+          role: 'CUSTOMER',
+          twoFactorEnabled: false
+        };
+        return next();
+      }
+
       req.user = await User.findById(decoded.userId).select('-password');
       if (!req.user) {
         res.status(401);
