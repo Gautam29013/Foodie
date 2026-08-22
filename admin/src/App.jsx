@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
+import Products from './pages/Products';
 
 // Placeholders for inner pages
 const Placeholder = ({ title }) => (
@@ -21,43 +22,36 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('http://localhost:5001/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include' // This is crucial to send the HTTP-only jwt cookie
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.role === 'ADMIN') {
-            setIsAuthenticated(true);
-          } else {
-            // Logged in but not admin
-            window.location.href = 'http://localhost:5173/login';
-          }
-        } else {
-          // Not logged in
-          window.location.href = 'http://localhost:5173/login';
+    // FIX: The old approach used a cross-origin fetch('/api/auth/me') with cookie
+    // credentials. This ALWAYS fails between different ports (5173 client →
+    // 5174 admin → 5001 server) because browsers block SameSite=lax cookies
+    // in cross-origin redirects.
+    //
+    // Solution: read from localStorage['userInfo'], which the Login page already
+    // stores on successful login. This is instant and works across ports.
+    try {
+      const stored = localStorage.getItem('userInfo');
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user && user.role === 'ADMIN') {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
         }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        window.location.href = 'http://localhost:5173/login';
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (e) {
+      // Corrupt localStorage — fall through to redirect
+    }
 
-    checkAuth();
+    // Not logged in or not an admin → send them to the login page
+    setIsLoading(false);
+    window.location.href = 'http://localhost:5173/login';
   }, []);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -73,7 +67,7 @@ function App() {
           <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/products" element={<Placeholder title="Products" />} />
+              <Route path="/products" element={<Products />} />
               <Route path="/categories" element={<Placeholder title="Categories" />} />
               <Route path="/orders" element={<Placeholder title="Orders" />} />
               <Route path="/customers" element={<Placeholder title="Customers" />} />
