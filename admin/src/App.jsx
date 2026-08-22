@@ -30,6 +30,15 @@ function App() {
     // Solution: read from localStorage['userInfo'], which the Login page already
     // stores on successful login. This is instant and works across ports.
     try {
+      // Check for userInfo in URL (from cross-origin login redirect)
+      const params = new URLSearchParams(window.location.search);
+      const urlUserInfo = params.get('userInfo');
+      if (urlUserInfo) {
+        localStorage.setItem('userInfo', urlUserInfo);
+        // Remove from URL without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
       const stored = localStorage.getItem('userInfo');
       if (stored) {
         const user = JSON.parse(stored);

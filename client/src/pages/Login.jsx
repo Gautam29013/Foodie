@@ -74,7 +74,8 @@ const Login = () => {
       toast.success('Successfully logged in!');
       
       if (res.data.role === 'ADMIN') {
-        window.location.href = 'http://localhost:5174/';
+        const userInfoStr = encodeURIComponent(JSON.stringify(res.data));
+        window.location.href = `http://localhost:5174/?userInfo=${userInfoStr}`;
       } else {
         navigate('/');
       }
@@ -100,7 +101,8 @@ const Login = () => {
       toast.success('Successfully logged in!');
       
       if (res.data.role === 'ADMIN') {
-        window.location.href = 'http://localhost:5174/';
+        const userInfoStr = encodeURIComponent(JSON.stringify(res.data));
+        window.location.href = `http://localhost:5174/?userInfo=${userInfoStr}`;
       } else {
         navigate('/');
       }
